@@ -1,0 +1,9 @@
+Congklak-Game/Library/
+Congklak-Game/Temp/
+Congklak-Game/obj/
+*.csproj
+*.sln
+*.vsconfig
+*.suo
+Congklak-Game/.vs/Congklak-Game/v16/Browse.VC.db
+Congklak-Game/UserSettings/
