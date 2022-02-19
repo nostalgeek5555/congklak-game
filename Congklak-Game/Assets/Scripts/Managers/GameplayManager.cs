@@ -174,6 +174,7 @@ public class GameplayManager : MonoBehaviour
         {
             Debug.Log($"player getting first turn");
             player.StateController(Player.States.GET_TURN);
+            UIManager.Instance.InitUI();
         }
 
         else

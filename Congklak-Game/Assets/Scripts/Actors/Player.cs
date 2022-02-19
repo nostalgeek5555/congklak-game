@@ -3,6 +3,9 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using Lean.Pool;
+using DG.Tweening;
 
 public class Player : ActorBase
 {
@@ -15,6 +18,16 @@ public class Player : ActorBase
     public List<BoardHole> boardHoles = new List<BoardHole>();
     public int currentPickedHoleId = -1;
     public BoardHole currentPickedHole;
+    public Transform grabberTransform;
+
+    [Header("Player UI")]
+    public Button moveButton;
+
+
+    private void OnDisable()
+    {
+        UIManager.Instance.moveButton.onClick.RemoveAllListeners();
+    }
 
     public void StateController(States _states)
     {
@@ -85,6 +98,59 @@ public class Player : ActorBase
         }
     }
 
+    public void HandleOnMove()
+    {
+        if (states == States.GET_TURN)
+        {
+            if (currentPickedHole != null)
+            {
+                GameObject grabberGO = LeanPool.Spawn(grabber.gameObject, transform.parent);
+                grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
+                grabberTransform = grabberGO.transform;
+
+                StartCoroutine(GrabSeeds(grabberTransform, MoveThroughHoles));
+            }
+        }
+    }
+
+    private IEnumerator GrabSeeds(Transform grabber, Action<Transform> OnFinishGrabSeeds = null)
+    {
+        bool getAllSeed = false;
+
+        for (int i = 0; i < currentPickedHole.containedSeeds.Count; i++)
+        {
+            Seed seed = currentPickedHole.containedSeeds[i];
+            seed.transform.parent = grabber;
+            seed.collider.enabled = false;
+            seed.rigidbody.isKinematic = true;
+            seed.rigidbody.freezeRotation = true;
+
+            if (i == currentPickedHole.containedSeeds.Count - 1)
+            {
+                getAllSeed = true;
+            }
+        }
+
+        yield return new WaitUntil(() => getAllSeed = true);
+        Debug.Log($"grab all seed in this hole {getAllSeed}");
+
+        OnFinishGrabSeeds?.Invoke(currentPickedHole.movementPoint);
+    }
+
+    public void MoveThroughHoles(Transform movePoint)
+    {
+        float dist = Vector3.Distance(grabberTransform.position, movePoint.position);
+        float timeRequired = dist / 20f * Time.deltaTime;
+
+        Sequence sequence = DOTween.Sequence();
+        sequence.AppendInterval(0.2f);
+        sequence.Join(grabberTransform.DOMove(movePoint.position, 1f, false));
+
+        sequence.AppendCallback(() =>
+        {
+            Debug.Log("finish move");
+        });
+    }
 
     private void HandleOnInit()
     {
@@ -106,12 +172,12 @@ public class Player : ActorBase
 
     private void HandleOnGettingTurn()
     {
-
+        UIManager.Instance.moveButton.enabled = true;
     }
 
     private void HandleOnEndingTurn()
     {
-
+        UIManager.Instance.moveButton.enabled = false;
     }
 
     private void HandleOnWin()

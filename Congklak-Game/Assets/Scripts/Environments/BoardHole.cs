@@ -11,6 +11,7 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
     public Owner owner;
     public Type type;
     public SphereCollider sphereCollider;
+    public Transform movementPoint;
 
     public List<Seed> containedSeeds = new List<Seed>();
     public int totalCurrentSeeds = 0;
@@ -30,6 +31,7 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
 
     public void OnRaycastHit(CameraGameplayRaycaster initiator)
     {
+        Debug.Log("raycast hit");
         if (owner == Owner.PLAYER && type == Type.ORDINARY && !picked)
         {
             if (GameplayManager.Instance.player != null && GameplayManager.Instance.player.states == Player.States.GET_TURN)

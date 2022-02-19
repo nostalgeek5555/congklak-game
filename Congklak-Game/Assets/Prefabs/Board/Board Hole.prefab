@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7133228886317686384
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7907405803807773754}
+  m_Layer: 3
+  m_Name: Setup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7907405803807773754
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7133228886317686384}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 6876879847968352614}
+  - {fileID: 2799856049170060878}
+  m_Father: {fileID: 8152260411531521602}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8152260411531521601
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,7 +44,7 @@ GameObject:
   - component: {fileID: 8152260411531521604}
   - component: {fileID: 1205597698662545884}
   - component: {fileID: 3052754250484356498}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Board Hole
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30,7 +62,7 @@ Transform:
   m_LocalPosition: {x: -0.584, y: -0.0166, z: 0.1055}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 6876879847968352614}
+  - {fileID: 7907405803807773754}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -63,6 +95,7 @@ MonoBehaviour:
   owner: 0
   type: 0
   sphereCollider: {fileID: 8152260411531521604}
+  movementPoint: {fileID: 0}
   containedSeeds: []
   totalCurrentSeeds: 0
   touchedSign: {fileID: 8868406021667579045}
@@ -94,7 +127,7 @@ GameObject:
   - component: {fileID: 4111446927575600122}
   - component: {fileID: 6656839279288558589}
   - component: {fileID: 6324369507837665686}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: TouchedHoleSign
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,11 +141,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8868406021667579045}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.072, y: 0, z: -0.065}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.07199997, y: 0, z: -0.065}
   m_LocalScale: {x: 0.03, y: 0.03, z: 0.03}
   m_Children: []
-  m_Father: {fileID: 8152260411531521602}
+  m_Father: {fileID: 7907405803807773754}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4111446927575600122
@@ -177,3 +210,65 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1001 &2916862014796484965
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7907405803807773754}
+    m_Modifications:
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.011199951
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.30229998
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.00849998
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054353251975350060, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+      propertyPath: m_Name
+      value: Movement Point
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+--- !u!4 &2799856049170060878 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1054353251975350059, guid: 678bea24fd3dba241b56be2620fc09be, type: 3}
+  m_PrefabInstance: {fileID: 2916862014796484965}
+  m_PrefabAsset: {fileID: 0}

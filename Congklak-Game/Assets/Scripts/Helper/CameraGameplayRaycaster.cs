@@ -15,7 +15,8 @@ public class CameraGameplayRaycaster : MonoBehaviour
         Ray ray = _myCam.ScreenPointToRay(touchInfo.mostRecent_pixelPos);
         RaycastHit hitInfo;
         bool hit = Physics.Raycast(ray, out hitInfo, Mathf.Infinity, _raycastMask.value);
-        Debug.DrawRay(ray.origin, ray.direction, Color.red, 10);
+        Debug.DrawRay(ray.origin, ray.direction, Color.red, 100f);
+        Debug.Log($"raycast from camera origin {ray.origin} to {ray.direction}");
         if (!hit)
         {
             return;
@@ -60,7 +61,7 @@ public class CameraGameplayRaycaster : MonoBehaviour
     private void CheckTouch(Vector3 pos)
     {
         ray = _myCam.ScreenPointToRay(pos);
-
+        Debug.DrawRay(ray.origin, pos, Color.red, 20f);
         //check if touched lower area near camera
         //if yes,use sphere cast, if no, use raycast
         if (pos.y <= Screen.height * 0.25f)
@@ -70,6 +71,7 @@ public class CameraGameplayRaycaster : MonoBehaviour
                 var col = hitInfo.collider.GetComponentInParent<ICameraRaycastCollidable>();
                 if (col == null) { return; }
                 col.OnRaycastHit(this);
+                Debug.Log("use spherecast");
             }
         }
         else
@@ -79,6 +81,7 @@ public class CameraGameplayRaycaster : MonoBehaviour
                 var col = hitInfo.collider.GetComponentInParent<ICameraRaycastCollidable>();
                 if (col == null) { return; }
                 col.OnRaycastHit(this);
+                Debug.Log("use raycast");
             }
         }
     }
