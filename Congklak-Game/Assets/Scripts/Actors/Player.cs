@@ -6,19 +6,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using Lean.Pool;
 using DG.Tweening;
+using Random = UnityEngine.Random;
+
 
 public class Player : ActorBase
 {
     public States states;
     public static event Action<States> OnBeforeStateUpdate;
     public static event Action<States> OnAfterStateUpdate;
-
-    [Header("Gameplay Properties")]
-    public Transform boardHoleParent;
-    public List<BoardHole> boardHoles = new List<BoardHole>();
-    public int currentPickedHoleId = -1;
-    public BoardHole currentPickedHole;
-    public Transform grabberTransform;
 
     [Header("Player UI")]
     public Button moveButton;
@@ -43,8 +38,13 @@ public class Player : ActorBase
             case States.PROCESSING_TURN:
                 HandleOnProcessingTurn();
                 break;
-            case States.GET_TURN:
-                HandleOnGettingTurn();
+            case States.FREE_TURN:
+                HandleOnGettingFreeTurn();
+                break;
+            case States.MOVETHRU_TURN:
+                HandleOnGettingMovethruTurn();
+                break;
+            case States.SHOOTING:
                 break;
             case States.END_TURN:
                 HandleOnEndingTurn();
@@ -62,99 +62,49 @@ public class Player : ActorBase
         OnAfterStateUpdate?.Invoke(_states);
     }
 
-    public List<BoardHole> SortBasedOnActiveHole()
-    {
-        IEnumerable<BoardHole> sortBoardHoles = boardHoles.OrderBy(hole => hole.id).Where(hole => hole.totalCurrentSeeds > 0);
-        List<BoardHole> sortedBoardHoles = sortBoardHoles.ToList();
-
-        return sortedBoardHoles;
-    }
-
-    public void PickHole(List<BoardHole> activeBoardHoles, int _id)
-    {
-        if (activeBoardHoles.Count > 0)
-        {
-            if (currentPickedHoleId != -1)
-            {
-                activeBoardHoles[currentPickedHoleId].picked = false;
-
-                BoardHole boardHole = activeBoardHoles[_id];
-                boardHole.picked = true;
-                currentPickedHole = boardHole;
-                currentPickedHoleId = boardHole.id;
-
-                Debug.Log($"pick current hole with id {currentPickedHoleId}");
-            }
-
-            else
-            {
-                BoardHole boardHole = activeBoardHoles[_id];
-                boardHole.picked = true;
-                currentPickedHole = boardHole;
-                currentPickedHoleId = boardHole.id;
-
-                Debug.Log($"pick current hole with id {currentPickedHoleId}");
-            }
-        }
-    }
 
     public void HandleOnMove()
     {
-        if (states == States.GET_TURN)
+        if (states == States.FREE_TURN)
         {
             if (currentPickedHole != null)
             {
-                GameObject grabberGO = LeanPool.Spawn(grabber.gameObject, transform.parent);
-                grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
-                grabberTransform = grabberGO.transform;
+                UIManager.Instance.moveButton.enabled = false;
 
-                StartCoroutine(GrabSeeds(grabberTransform, MoveThroughHoles));
+                foreach(BoardHole hole in boardHoles)
+                {
+                    hole.touchable = false;
+                }
+
+                if (grabberGO == null)
+                {
+                    grabberGO = LeanPool.Spawn(grabber.gameObject, transform.parent);
+                    grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
+
+
+                    grabber = grabberGO.GetComponent<Grabber>();
+                    grabber.belongToActor = GetComponent<ActorBase>();
+                    GameplayManager.Instance.currentGrabber = grabber;
+
+                    StartCoroutine(grabber.GrabSeeds(grabber.MoveToMovementPoint));
+                }
+
+                else
+                {
+                    grabber.firstMove = true;
+                    grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
+                    StartCoroutine(grabber.GrabSeeds(grabber.MoveToMovementPoint));
+                }
+                
             }
         }
-    }
-
-    private IEnumerator GrabSeeds(Transform grabber, Action<Transform> OnFinishGrabSeeds = null)
-    {
-        bool getAllSeed = false;
-
-        for (int i = 0; i < currentPickedHole.containedSeeds.Count; i++)
-        {
-            Seed seed = currentPickedHole.containedSeeds[i];
-            seed.transform.parent = grabber;
-            seed.collider.enabled = false;
-            seed.rigidbody.isKinematic = true;
-            seed.rigidbody.freezeRotation = true;
-
-            if (i == currentPickedHole.containedSeeds.Count - 1)
-            {
-                getAllSeed = true;
-            }
-        }
-
-        yield return new WaitUntil(() => getAllSeed = true);
-        Debug.Log($"grab all seed in this hole {getAllSeed}");
-
-        OnFinishGrabSeeds?.Invoke(currentPickedHole.movementPoint);
-    }
-
-    public void MoveThroughHoles(Transform movePoint)
-    {
-        float dist = Vector3.Distance(grabberTransform.position, movePoint.position);
-        float timeRequired = dist / 20f * Time.deltaTime;
-
-        Sequence sequence = DOTween.Sequence();
-        sequence.AppendInterval(0.2f);
-        sequence.Join(grabberTransform.DOMove(movePoint.position, 1f, false));
-
-        sequence.AppendCallback(() =>
-        {
-            Debug.Log("finish move");
-        });
     }
 
     private void HandleOnInit()
     {
         Debug.Log("init player");
+        currentPickedHole = null;
+
         if (boardHoleParent.childCount > 0)
         {
             for (int i = 0; i < boardHoleParent.childCount; i++)
@@ -167,17 +117,58 @@ public class Player : ActorBase
 
     private void HandleOnProcessingTurn()
     {
+        if (currentPickedHole.containedSeeds.Count > 1)
+        {
 
+        }
+
+        else
+        {
+            if (grabber.rotateCycleDone)
+            {
+
+            }
+
+            else
+            {
+
+            }
+        }
     }
 
-    private void HandleOnGettingTurn()
+    private void HandleOnGettingFreeTurn()
     {
+        GameplayManager.Instance.currentActor = GetComponent<ActorBase>();
         UIManager.Instance.moveButton.enabled = true;
+
+        foreach (BoardHole hole in boardHoles)
+        {
+            hole.touchable = true;
+        }
+    }
+
+    private void HandleOnGettingMovethruTurn()
+    {
+        grabber.firstMove = true;
+        UIManager.Instance.moveButton.enabled = false;
+        foreach (BoardHole hole in boardHoles)
+        {
+            hole.touchable = false;
+        }
+
+        grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
+        StartCoroutine(grabber.GrabSeeds(grabber.MoveToMovementPoint));
     }
 
     private void HandleOnEndingTurn()
     {
+        GameplayManager.Instance.currentActor = null;
         UIManager.Instance.moveButton.enabled = false;
+
+        foreach (BoardHole hole in boardHoles)
+        {
+            hole.touchable = false;
+        }
     }
 
     private void HandleOnWin()
@@ -208,9 +199,11 @@ public class Player : ActorBase
     {
         INIT = 0,
         PROCESSING_TURN = 1,
-        GET_TURN = 2,
-        END_TURN = 3,
-        WIN = 4,
-        GAME_OVER = 5
+        FREE_TURN = 2,
+        MOVETHRU_TURN = 3,
+        SHOOTING = 4,
+        END_TURN = 5,
+        WIN = 6,
+        GAME_OVER = 7
     }
 }

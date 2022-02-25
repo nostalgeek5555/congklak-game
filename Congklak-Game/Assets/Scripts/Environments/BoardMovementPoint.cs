@@ -7,6 +7,7 @@ using UnityEditor;
 
 public class BoardMovementPoint : MonoBehaviour
 {
+    public int movementPointID;
     public SphereCollider sphereCollider;
 
 

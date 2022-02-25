@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6613444237260265613}
   - component: {fileID: 903226856625375217}
   - component: {fileID: 8423814266470831803}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SeedPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -87,7 +87,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 609005678210873859}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Asset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 449124314314689161}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Non Asset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,6 +193,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 9fe80bcf748d8d54697268606ed36d51, type: 3}
       propertyPath: m_Name
       value: biji_congklak
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9fe80bcf748d8d54697268606ed36d51, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9fe80bcf748d8d54697268606ed36d51, type: 3}

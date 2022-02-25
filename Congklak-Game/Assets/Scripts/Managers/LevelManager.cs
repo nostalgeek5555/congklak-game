@@ -11,7 +11,6 @@ public class LevelManager : MonoBehaviour
     [Header("Congklak Board Environments")]
     public List<ActorBase> actorList = new List<ActorBase>();
     public List<Transform> actorCupZones = new List<Transform>();
-    public List<BoardHole> allHoles = new List<BoardHole>();
 
     [Header("Level Properties")]
     public int totalSeedEachCup;
@@ -47,18 +46,20 @@ public class LevelManager : MonoBehaviour
 
         seedSO = ResourceManager.Instance.seedTable["seed0"];
 
-        if (allHoles.Count > 0)
+        if (GameplayManager.Instance.allBoardHoles.Count > 0)
         {
-            for (int i = 0; i < allHoles.Count; i++)
+            for (int i = 0; i < GameplayManager.Instance.allBoardHoles.Count; i++)
             {
-                BoardHole boardHole = allHoles[i];
+                BoardHole boardHole = GameplayManager.Instance.allBoardHoles[i];
                 if (boardHole.type == BoardHole.Type.ORDINARY)
                 {
                     boardHole.containedSeeds = new List<Seed>();
+                    boardHole.empty = false;
                     for (int k = 0; k < totalSeedEachCup; k++)
                     {
                         GameObject seedGO = LeanPool.Spawn(seedSO.seedModel, boardHole.gameObject.transform);
                         Seed seed = seedGO.GetComponent<Seed>();
+                        seed.Init();
                         boardHole.containedSeeds.Add(seed);
                         boardHole.totalCurrentSeeds++;
                     }
@@ -72,9 +73,9 @@ public class LevelManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
         Debug.Log($"all holes has been filled with seeds");
-        
 
-        foreach (BoardHole hole in allHoles)
+
+        foreach (BoardHole hole in GameplayManager.Instance.allBoardHoles)
         {
             if (hole.type == BoardHole.Type.ORDINARY)
             {

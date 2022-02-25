@@ -18,6 +18,7 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
 
     [Header("Interactable Properties")]
     public GameObject touchedSign;
+    public bool touchable = false;
     public bool empty = true;
     public bool picked = false;
 
@@ -25,32 +26,35 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
     {
         if (containedSeeds.Count > 0)
         {
+            touchable = true;
             empty = false;
         }
     }
 
     public void OnRaycastHit(CameraGameplayRaycaster initiator)
     {
-        Debug.Log("raycast hit");
-        if (owner == Owner.PLAYER && type == Type.ORDINARY && !picked)
+        if (owner == Owner.PLAYER && type == Type.ORDINARY && touchable)
         {
-            if (GameplayManager.Instance.player != null && GameplayManager.Instance.player.states == Player.States.GET_TURN)
+            if (GameplayManager.Instance.player != null && GameplayManager.Instance.player.states == Player.States.FREE_TURN)
             {
                 touchedSign.SetActive(true);
                 if (GameplayManager.Instance.player.currentPickedHole != null)
                 {
                     BoardHole boardHole = GameplayManager.Instance.player.currentPickedHole;
-                    boardHole.picked = false;
                     boardHole.touchedSign.SetActive(false);
 
                     GameplayManager.Instance.player.currentPickedHole = this;
-                    picked = true;
+                    GameplayManager.Instance.player.initHole = this;
+                    GameplayManager.Instance.player.currentPickedHoleId = id;
+                    GameplayManager.Instance.player.firstMovePointId = id;
                 }
 
                 else
                 {
                     GameplayManager.Instance.player.currentPickedHole = this;
-                    picked = true;
+                    GameplayManager.Instance.player.initHole = this;
+                    GameplayManager.Instance.player.currentPickedHoleId = id;
+                    GameplayManager.Instance.player.firstMovePointId = id;
                 }
             }
         }
@@ -59,12 +63,20 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
 
     void IOnTriggerNotifiable.onChild_OnTriggerEnter(Collider myEnteredTrigger, Collider other)
     {
-        
+        if (other.TryGetComponent(out Seed seed))
+        {
+            if (seed.grabbed)
+            {
+                containedSeeds.Add(seed);
+                seed.transform.SetParent(transform);
+                GameplayManager.Instance.HandleOnSeedDropped(this);
+            }
+        }
     }
 
     void IOnTriggerNotifiable.onChild_OnTriggerStay(Collider myEnteredTrigger, Collider other)
     {
-        
+
     }
 
     void IOnTriggerNotifiable.onChild_OnTriggerExit(Collider myEnteredTrigger, Collider other)

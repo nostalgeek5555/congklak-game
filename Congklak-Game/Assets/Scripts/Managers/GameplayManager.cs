@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Lean.Pool;
+using DG.Tweening;
 using Random = UnityEngine.Random;
 
 public class GameplayManager : MonoBehaviour
@@ -20,8 +22,12 @@ public class GameplayManager : MonoBehaviour
     [Header("Actor Properties")]
     public Transform actorParent;
     public ActorBase currentActor;
+    public Grabber currentGrabber;
     public Player player;
     public Ai ai;
+    
+    public List<BoardHole> allBoardHoles = new List<BoardHole>();
+    
 
     private void OnEnable()
     {
@@ -86,8 +92,10 @@ public class GameplayManager : MonoBehaviour
                 HandleBeforeGameInitiation();
                 break;
             case GameState.START_GAME:
+                HandleOnGameStart();
                 break;
             case GameState.SHIFT_TURN:
+                HandleOnShiftTurn();
                 break;
             case GameState.WIN:
                 break;
@@ -108,7 +116,8 @@ public class GameplayManager : MonoBehaviour
         string currentGameModeKey = GameModeSO.PlayerModeType.SinglePlayer + "|" + GameModeSO.ModeType.Offline;
         currentGameMode = ResourceManager.Instance.gameModeTable[currentGameModeKey];
 
-        LevelManager.Instance.allHoles = new List<BoardHole>();
+        //LevelManager.Instance.allHoles = new List<BoardHole>();
+        allBoardHoles = new List<BoardHole>();
 
         //init player & enemy
         switch (currentGameMode.playerModeType)
@@ -127,7 +136,8 @@ public class GameplayManager : MonoBehaviour
                             for (int i = 0; i < player.transform.childCount; i++)
                             {
                                 BoardHole boardHole = player.transform.GetChild(i).GetComponent<BoardHole>();
-                                LevelManager.Instance.allHoles.Add(boardHole);
+                                //LevelManager.Instance.allHoles.Add(boardHole);
+                                allBoardHoles.Add(boardHole);
                             }
                         }
 
@@ -140,7 +150,8 @@ public class GameplayManager : MonoBehaviour
                             for (int i = 0; i < enemyGO.transform.childCount; i++)
                             {
                                 BoardHole boardHole = enemyGO.transform.GetChild(i).GetComponent<BoardHole>();
-                                LevelManager.Instance.allHoles.Add(boardHole);
+                                allBoardHoles.Add(boardHole);
+                                //LevelManager.Instance.allHoles.Add(boardHole);
                             }
                         }
 
@@ -166,14 +177,14 @@ public class GameplayManager : MonoBehaviour
         LevelManager.Instance.PopulateLevel();
     }
 
-    public void StartGameplay()
+    public void HandleOnGameStart()
     {
-        int randomTurn = Random.RandomRange(0, 1);
+        int randomTurn = 0;//Random.RandomRange(0, 1);
 
         if (randomTurn == 0)
         {
             Debug.Log($"player getting first turn");
-            player.StateController(Player.States.GET_TURN);
+            player.StateController(Player.States.FREE_TURN);
             UIManager.Instance.InitUI();
         }
 
@@ -181,6 +192,155 @@ public class GameplayManager : MonoBehaviour
         {
             Debug.Log($"enemy ai getting first turn");
         }
+    }
+
+    public void HandleOnShiftTurn()
+    {
+
+    }
+
+
+    #region GAME_CORE_LOOP
+    public void HandleOnSeedDropped(BoardHole hole)
+    {
+        if (currentGrabber.seeds.Count > 0)
+        {
+            currentGrabber.currentHoleIndex++;
+            currentGrabber.MoveToMovementPoint(currentGrabber.currentHoleIndex, 1f);
+        }
+
+        else
+        {
+            currentActor.initHole.touchedSign.SetActive(false);
+            currentActor.currentPickedHole.touchedSign.SetActive(false);
+            currentActor.currentPickedHole = hole;
+            currentActor.currentPickedHole.touchedSign.SetActive(true);
+
+            //check if current hole only contain 1 seed
+            if (hole.containedSeeds.Count == 1)
+            {
+                if (currentActor.boardHoles.Contains(hole))
+                {
+                    switch (hole.type)
+                    {
+                        case BoardHole.Type.ORDINARY:
+                            //check if this hole belong to current playing actor and check if grabber has rotating one cycle, if yes then do SHOOTING method
+                            if (currentGrabber.rotateCycleDone)
+                            {
+                                Debug.Log("run shooting method");
+                            }
+
+                            else
+                            {
+                                Debug.Log("shift turn");
+                            }
+                            break;
+
+                        case BoardHole.Type.BASE:
+                            if (IsAllSeedDroppedInBase())
+                            {
+                                Debug.Log("Start calculating final result for all actors");
+                            }
+
+                            else
+                            {
+                                switch (currentActor.role)
+                                {
+                                    case ActorBase.Role.PLAYER:
+                                        Player player = currentActor.GetComponent<Player>();
+                                        player.StateController(Player.States.FREE_TURN);
+                                        break;
+
+                                    case ActorBase.Role.AI:
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                else
+                {
+                    Debug.Log("shift turn to another actor");
+                }
+                
+            }
+
+            else
+            {
+                switch (hole.type)
+                {
+                    case BoardHole.Type.ORDINARY:
+                        switch (currentActor.role)
+                        {
+                            case ActorBase.Role.PLAYER:
+                                Player player = currentActor.GetComponent<Player>();
+                                player.StateController(Player.States.MOVETHRU_TURN);
+                                break;
+
+                            case ActorBase.Role.AI:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case BoardHole.Type.BASE:
+                        switch (currentActor.role)
+                        {
+                            case ActorBase.Role.PLAYER:
+                                Player player = currentActor.GetComponent<Player>();
+                                player.StateController(Player.States.FREE_TURN);
+                                break;
+
+                            case ActorBase.Role.AI:
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    public bool IsAllSeedDroppedInBase()
+    {
+        int emptyHole = 0;
+
+        for (int i = 0; i < allBoardHoles.Count; i++)
+        {
+            BoardHole hole = allBoardHoles[i];
+            if (hole.empty)
+            {
+                emptyHole++;
+            }
+        }
+
+
+        if (emptyHole == allBoardHoles.Count)
+        {
+            Debug.Log($"total empty hole {emptyHole}");
+            return true;
+        }
+
+        else
+        {
+            Debug.Log($"total empty hole {emptyHole}");
+            return false;
+        }
+    }
+
+    #endregion
+    public void StartGameplay()
+    {
+        StateController(GameState.START_GAME);
     }
 
 
