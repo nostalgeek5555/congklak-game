@@ -174,6 +174,7 @@ public class GameplayManager : MonoBehaviour
     public void HandleGameInitiation()
     {
         player.StateController(Player.States.INIT);
+        ai.StateController(Ai.States.INIT);
         LevelManager.Instance.PopulateLevel();
     }
 
@@ -227,6 +228,31 @@ public class GameplayManager : MonoBehaviour
                             //check if this hole belong to current playing actor and check if grabber has rotating one cycle, if yes then do SHOOTING method
                             if (currentGrabber.rotateCycleDone)
                             {
+                                switch (currentActor.role)
+                                {
+                                    case ActorBase.Role.PLAYER:
+                                        int facingHoleIndex = (ai.boardHoles.Count - 1) - player.boardHoles.IndexOf(hole);
+                                        BoardHole facingHole = ai.boardHoles[facingHoleIndex];
+
+                                        Debug.Log("start procedure for shooting");
+                                        if (facingHole.containedSeeds.Count > 0)
+                                        {
+                                            Debug.Log($"contain seed {facingHole.containedSeeds.Count} start shooting");
+                                            player.StateController(Player.States.SHOOTING);
+                                        }
+
+                                        else
+                                        {
+                                            Debug.Log("end turn");
+                                            player.StateController(Player.States.END_TURN);
+                                        }
+                                        
+                                        break;
+                                    case ActorBase.Role.AI:
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 Debug.Log("run shooting method");
                             }
 

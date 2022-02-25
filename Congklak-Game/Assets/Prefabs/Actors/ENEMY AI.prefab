@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2976112167426243065}
+  - component: {fileID: 6860675903494322807}
   m_Layer: 0
   m_Name: ENEMY AI
   m_TagString: Untagged
@@ -38,6 +39,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6860675903494322807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2976112167426243064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 303266e42aece91469218a0d9e4185ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  role: 1
+  grabber: {fileID: -2651721669411692874, guid: 486775683951cb04da8ee0dc004701d1, type: 3}
+  grabberGO: {fileID: 0}
+  currentPickedHoleId: -1
+  firstMovePointId: -1
+  initHole: {fileID: 0}
+  currentPickedHole: {fileID: 0}
+  boardHoleParent: {fileID: 2976112167426243065}
+  boardHoles: []
 --- !u!1001 &2976112167445236457
 PrefabInstance:
   m_ObjectHideFlags: 0

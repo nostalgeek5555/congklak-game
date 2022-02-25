@@ -51,6 +51,8 @@ public class Grabber : MonoBehaviour
             seed.rigidbody.freezeRotation = true;
             seeds.Add(seed);
 
+            Sequence sequence = DOTween.Sequence();
+            sequence.Join(seed.transform.DOMove(seed.transform.parent.position, 0.2f, false));
             //belongToActor.currentPickedHole.containedSeeds.Remove(seed);
 
             if (i == belongToActor.currentPickedHole.containedSeeds.Count - 1)

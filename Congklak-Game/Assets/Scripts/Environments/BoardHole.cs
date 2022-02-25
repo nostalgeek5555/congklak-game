@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
+using DG.Tweening;
+using Random = UnityEngine.Random;
 
 public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastCollidable
 {
@@ -60,6 +63,59 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
         }
     }
 
+    public void ThrowSeed(Transform _target, float _height, float _duration)
+    {
+        Debug.Log("Throw seed");
+        int randomSeed = Random.Range(0, containedSeeds.Count - 1);
+        Seed seed = containedSeeds[randomSeed];
+        seed.grabbed = false;
+        seed.collider.enabled = false;
+        seed.rigidbody.isKinematic = true;
+        //seed.rigidbody.freezeRotation = true;
+        seed.transform.SetParent(_target);
+
+        BoardHole hole = _target.GetComponent<BoardHole>();
+
+        DOTween.To(setter: value =>
+        {
+            Debug.Log(value);
+            seed.transform.position = EMath.Parabola(seed.transform.position, _target.transform.position, _height, value);
+        }, startValue: 0, endValue: 1, duration: _duration)
+        .SetEase(Ease.OutCirc)
+        .OnComplete(() =>
+        {
+            BoardHole hole = _target.gameObject.GetComponent<BoardHole>();
+            hole.containedSeeds.Add(seed);
+            seed.collider.enabled = true;
+            seed.rigidbody.isKinematic = false;
+            seed.rigidbody.freezeRotation = false;
+            containedSeeds.Remove(seed);
+
+            if (containedSeeds.Count > 0)
+            {
+                ThrowSeed(_target, _height, _duration);
+            }
+            
+        });
+
+        //else
+        //{
+        //    //if (GameplayManager.Instance.currentActor != null)
+        //    //{
+        //    //    switch (GameplayManager.Instance.currentActor.role)
+        //    //    {
+        //    //        case ActorBase.Role.PLAYER:
+        //    //            GameplayManager.Instance.player.StateController(Player.States.END_TURN);
+        //    //            break;
+        //    //        case ActorBase.Role.AI:
+        //    //            break;
+        //    //        default:
+        //    //            break;
+        //    //    }
+        //    //}
+        //}
+    }
+
 
     void IOnTriggerNotifiable.onChild_OnTriggerEnter(Collider myEnteredTrigger, Collider other)
     {
@@ -106,3 +162,5 @@ public class BoardHole : MonoBehaviour, IOnTriggerNotifiable, ICameraRaycastColl
     }
 
 }
+
+

@@ -1,12 +1,6 @@
 using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Lean.Pool;
-using DG.Tweening;
-using Random = UnityEngine.Random;
 
 
 public class Player : ActorBase
@@ -14,10 +8,7 @@ public class Player : ActorBase
     public States states;
     public static event Action<States> OnBeforeStateUpdate;
     public static event Action<States> OnAfterStateUpdate;
-
-    [Header("Player UI")]
-    public Button moveButton;
-
+    
 
     private void OnDisable()
     {
@@ -45,6 +36,7 @@ public class Player : ActorBase
                 HandleOnGettingMovethruTurn();
                 break;
             case States.SHOOTING:
+                HandleOnGetShooting();
                 break;
             case States.END_TURN:
                 HandleOnEndingTurn();
@@ -159,6 +151,21 @@ public class Player : ActorBase
         grabberGO.transform.position = currentPickedHole.gameObject.transform.position;
         StartCoroutine(grabber.GrabSeeds(grabber.MoveToMovementPoint));
     }
+
+    private void HandleOnGetShooting()
+    {
+        int facingHoleIndex = (GameplayManager.Instance.ai.boardHoles.Count - 2) - boardHoles.IndexOf(currentPickedHole);
+        BoardHole facingHole = GameplayManager.Instance.ai.boardHoles[facingHoleIndex];
+        BoardHole baseHole = boardHoles[boardHoles.Count - 1];
+
+        float distanceFromFacingHole = Vector3.Distance(facingHole.transform.position, baseHole.transform.position);
+
+        float duration = 10f / distanceFromFacingHole;
+
+        currentPickedHole.ThrowSeed(baseHole.transform, 0.2f, 10f);
+        facingHole.ThrowSeed(baseHole.transform, 0.2f, 10f);
+    }
+
 
     private void HandleOnEndingTurn()
     {
